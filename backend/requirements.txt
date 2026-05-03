@@ -1,0 +1,45 @@
+# Core
+Django
+djangorestframework
+django-cors-headers
+django-filter
+python-decouple
+Pillow
+
+# Auth
+djangorestframework-simplejwt
+django-allauth
+
+# Database
+psycopg2-binary
+django-redis
+
+# Celery & Redis
+celery
+redis
+django-celery-beat
+django-celery-results
+flower
+
+# AWS S3
+boto3
+django-storages
+
+# WebSockets
+channels
+channels-redis
+daphne
+
+# Testing
+pytest
+pytest-django
+pytest-cov
+factory-boy
+faker
+
+# Utilities
+djangorestframework-camel-case
+drf-spectacular
+django-extensions
+gunicorn
+whitenoise

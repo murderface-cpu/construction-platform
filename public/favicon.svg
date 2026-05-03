@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background -->
+  <rect width="64" height="64" rx="10" fill="#0f172a"></rect>
+
+  <!-- Grid lines (subtle industrial feel) -->
+  <g stroke="#1e293b" stroke-width="1">
+    <line x1="0" y1="32" x2="64" y2="32"></line>
+    <line x1="32" y1="0" x2="32" y2="64"></line>
+  </g>
+
+  <!-- Bold "B" -->
+  <path d="M20 16 H36 
+           Q44 16 44 24 
+           Q44 30 36 30 
+           H20 Z
+           
+           M20 30 H38 
+           Q46 30 46 40 
+           Q46 48 36 48 
+           H20 Z" fill="#e2e8f0"></path>
+
+  <!-- Accent line (tech highlight) -->
+  <rect x="20" y="48" width="24" height="2" fill="#3b82f6"></rect>
+</svg>
