@@ -88,7 +88,7 @@ def create_booking(
     if scheduled_end <= scheduled_start:
         raise ValidationError("Booking end time must be after start time.")
 
-    # Check for conflicting accepted bookings in this window
+    # Treat pending bookings as reserved time until the contractor accepts or rejects.
     conflict = Booking.objects.filter(
         contractor=contractor,
         status__in=[Booking.Status.PENDING, Booking.Status.ACCEPTED],
@@ -151,7 +151,7 @@ def respond_to_booking(
     elif action == Booking.Status.REJECTED:
         booking.status = Booking.Status.REJECTED
         booking.rejection_reason = rejection_reason
-        # Release the slot
+        # Rejected requests reopen the slot for other homeowners.
         if booking.availability_slot:
             booking.availability_slot.is_booked = False
             booking.availability_slot.save(update_fields=["is_booked"])

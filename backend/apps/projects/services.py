@@ -152,7 +152,7 @@ def update_milestone(milestone_id: str, project_id: str, requestor: User, **fiel
             metadata={"milestone_id": str(milestone_id), "old": old_status, "new": fields["status"]},
         )
 
-        # Push real-time WebSocket event
+        # Import lazily to keep project services usable when Channels is not initialized.
         from apps.notifications.ws_utils import broadcast_project_event
         broadcast_project_event(
             project_id=str(project_id),

@@ -12,6 +12,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Keep token refresh single-flight so simultaneous 401s reuse one refresh request.
 let isRefreshing = false;
 let refreshQueue: Array<(token: string) => void> = [];
 

@@ -42,7 +42,7 @@ Each app follows the **service layer pattern**:
 ### 2. Clone & virtual environment
 ```bash
 git clone <repo-url>
-cd construction_platform
+cd construction-platform/backend
 python -m venv venv
 source venv/bin/activate          # Windows: venv\Scripts\activate
 pip install -r requirements.txt
