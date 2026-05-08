@@ -10,6 +10,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
 import Dashboard from "@/pages/Dashboard";
 import Contractors from "@/pages/contractors/Contractors";
 import ContractorDetail from "@/pages/contractors/ContractorDetail";
@@ -37,6 +38,7 @@ const App = () => (
           <Route element={<AuthLayout />}>
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/register" element={<Register />} />
+            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
           </Route>
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>

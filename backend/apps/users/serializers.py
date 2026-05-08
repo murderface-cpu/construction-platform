@@ -114,3 +114,21 @@ class PublicUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "name", "profile_image", "rating", "role", "location"]
         read_only_fields = fields
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Validates the forgot-password request (step 1)."""
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Validates the token + new password (step 2)."""
+    token = serializers.UUIDField()
+    new_password = serializers.CharField(write_only=True, min_length=8, validators=[validate_password])
+    new_password_confirm = serializers.CharField(write_only=True, min_length=8)
+
+    def validate(self, attrs: dict) -> dict:
+        if attrs["new_password"] != attrs["new_password_confirm"]:
+            raise serializers.ValidationError(
+                {"new_password_confirm": "Passwords do not match."}
+            )
+        return attrs

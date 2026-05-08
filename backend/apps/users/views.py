@@ -19,9 +19,12 @@ from . import services
 from .serializers import (
     ChangePasswordSerializer,
     CustomTokenObtainPairSerializer,
+    PasswordResetConfirmSerializer,
     RegisterSerializer,
     UpdateProfileSerializer,
     UserProfileSerializer,
+    PasswordResetRequestSerializer,  
+    PasswordResetConfirmSerializer, 
 )
 
 
@@ -133,3 +136,30 @@ class ProfileImageUploadURLView(APIView):
             content_type=content_type,
         )
         return success_response(result)
+    
+class PasswordResetRequestView(APIView):
+    """POST /api/v1/auth/password/reset/ — request a reset email."""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request: Request) -> Response:
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        services.request_password_reset(serializer.validated_data["email"])
+        # Always return 200 regardless of whether email exists
+        return success_response(message="If this email is registered, a reset link has been sent.")
+
+
+class PasswordResetConfirmView(APIView):
+    """POST /api/v1/auth/password/reset/confirm/ — set a new password using the token."""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request: Request) -> Response:
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        services.confirm_password_reset(
+            token=str(serializer.validated_data["token"]),
+            new_password=serializer.validated_data["new_password"],
+        )
+        return success_response(message="Password reset successfully. You can now sign in.")

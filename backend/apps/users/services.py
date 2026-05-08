@@ -82,3 +82,54 @@ def update_user_rating(user: User) -> None:
     user.rating = agg["avg_rating"] or 0
     user.reviews_count = agg["total"] or 0
     user.save(update_fields=["rating", "reviews_count"])
+
+def request_password_reset(email: str) -> None:
+    """
+    Generate a reset token and email it to the user.
+    Silently does nothing if the email doesn't exist (no account enumeration).
+    """
+    from django.core.mail import send_mail
+    from django.conf import settings
+    from .models import PasswordResetToken
+
+    try:
+        user = User.objects.get(email__iexact=email)
+    except User.DoesNotExist:
+        return  # Intentionally silent
+
+    # Invalidate any existing unused tokens for this user
+    PasswordResetToken.objects.filter(user=user, used=False).update(used=True)
+
+    token_obj = PasswordResetToken.objects.create(user=user)
+    reset_url = f"{settings.FRONTEND_URL}/auth/reset-password?token={token_obj.token}"
+
+    send_mail(
+        subject="Reset your BuildHub password",
+        message=f"Click the link to reset your password (expires in 30 minutes):\n\n{reset_url}",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        fail_silently=True,
+    )
+
+
+def confirm_password_reset(token: str, new_password: str) -> None:
+    """
+    Validate the reset token and set the new password.
+
+    Raises:
+        ValidationError: If the token is invalid, expired, or already used.
+    """
+    from .models import PasswordResetToken
+
+    try:
+        token_obj = PasswordResetToken.objects.select_related("user").get(token=token)
+    except PasswordResetToken.DoesNotExist:
+        raise ValidationError({"token": "Invalid or expired reset link."})
+
+    if not token_obj.is_valid():
+        raise ValidationError({"token": "This reset link has expired. Please request a new one."})
+
+    token_obj.user.set_password(new_password)
+    token_obj.user.save(update_fields=["password"])
+    token_obj.used = True
+    token_obj.save(update_fields=["used"])

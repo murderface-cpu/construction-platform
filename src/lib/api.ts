@@ -69,6 +69,10 @@ export const authApi = {
     api.patch("/auth/me/", data),
   changePassword: (data: { old_password: string; new_password: string }) =>
     api.post("/auth/change-password/", data),
+  forgotPassword: (email: string) =>
+    axios.post("/auth/password/reset/", { email }),
+  resetPassword: (token: string, new_password: string, new_password_confirm: string) =>
+    axios.post("/auth/password/reset/confirm/", { token, new_password, new_password_confirm }),
 };
 
 export const contractorsApi = {

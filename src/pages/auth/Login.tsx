@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Loader2, HardHat } from "lucide-react";
+import { Eye, EyeOff, Loader2, HardHat, ArrowRight, ShieldCheck, Star, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore, type UserRole } from "@/store/authStore";
 import { authApi } from "@/lib/api";
+
+const TRUST_SIGNALS = [
+  { icon: ShieldCheck, text: "Bank-grade security" },
+  { icon: Star, text: "4.9 average rating" },
+  { icon: Zap, text: "Instant matching" },
+];
 
 export default function Login() {
   const navigate = useNavigate();
@@ -25,7 +31,6 @@ export default function Login() {
     setLoading(true);
     try {
       const { data } = await authApi.login(email, password);
-      // Backend returns access + refresh tokens; fetch /me for profile
       const meRes = await fetch(
         `${import.meta.env.VITE_API_BASE_URL || "/api/v1"}/auth/me/`,
         { headers: { Authorization: `Bearer ${data.access}` } }
@@ -53,23 +58,27 @@ export default function Login() {
   };
 
   return (
-    <div className="space-y-7">
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-2 mb-4 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-accent">
-            <HardHat className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-semibold text-sm">BuildHub</span>
+    <div className="space-y-6">
+      {/* Mobile logo */}
+      <div className="flex items-center gap-2.5 lg:hidden">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-sm">
+          <HardHat className="h-4 w-4 text-primary-foreground" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+        <span className="font-semibold tracking-tight">BuildHub</span>
+      </div>
+
+      {/* Header */}
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Sign in to BuildHub</h1>
         <p className="text-sm text-muted-foreground">
-          Welcome back. Pick up where you left off.
+          Welcome back — pick up where you left off.
         </p>
       </div>
 
+      {/* Form */}
       <form onSubmit={onSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-sm font-medium">Email address</Label>
           <Input
             id="email"
             type="email"
@@ -77,12 +86,17 @@ export default function Login() {
             placeholder="you@company.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="h-10"
           />
         </div>
-        <div className="space-y-2">
+
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <Link to="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+            <Link
+              to="/auth/forgot-password"
+              className="text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
+            >
               Forgot password?
             </Link>
           </div>
@@ -94,11 +108,12 @@ export default function Login() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="h-10 pr-10"
             />
             <button
               type="button"
               onClick={() => setShow((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               aria-label={show ? "Hide password" : "Show password"}
             >
               {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -106,18 +121,48 @@ export default function Login() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Sign in
+        <Button
+          type="submit"
+          className="group w-full gap-2 font-medium shadow-sm"
+          size="lg"
+          disabled={loading}
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              Sign in
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </>
+          )}
         </Button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
-        New to BuildHub?{" "}
-        <Link to="/auth/register" className="font-medium text-foreground hover:underline">
-          Create an account
-        </Link>
-      </p>
+      {/* Divider */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-card px-3 text-xs text-muted-foreground">
+            New to BuildHub?
+          </span>
+        </div>
+      </div>
+
+      <Button asChild variant="outline" className="w-full" size="lg">
+        <Link to="/auth/register">Create a free account</Link>
+      </Button>
+
+      {/* Trust signals */}
+      <div className="flex items-center justify-center gap-5 border-t border-border/50 pt-4">
+        {TRUST_SIGNALS.map(({ icon: Icon, text }) => (
+          <div key={text} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Icon className="h-3 w-3 text-primary/70" />
+            <span>{text}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

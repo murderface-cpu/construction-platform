@@ -10,6 +10,8 @@ from .views import (
     ProfileImageUploadURLView,
     ProfileView,
     RegisterView,
+    PasswordResetRequestView,    
+    PasswordResetConfirmView, 
 )
 
 urlpatterns = [
@@ -20,4 +22,6 @@ urlpatterns = [
     path("me/", ProfileView.as_view(), name="auth-me"),
     path("change-password/", ChangePasswordView.as_view(), name="auth-change-password"),
     path("profile-image-upload-url/", ProfileImageUploadURLView.as_view(), name="profile-image-upload-url"),
+    path("password/reset/", PasswordResetRequestView.as_view(), name="auth-password-reset"),
+    path("password/reset/confirm/", PasswordResetConfirmView.as_view(), name="auth-password-reset-confirm"),
 ]

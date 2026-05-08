@@ -8,6 +8,9 @@ Roles:
 
 from __future__ import annotations
 
+import uuid
+from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -102,3 +105,16 @@ class User(AbstractBaseUser, PermissionsMixin, TimestampedModel):
     @property
     def is_contractor(self) -> bool:
         return self.role == self.Role.CONTRACTOR
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="password_reset_tokens")
+    token = models.UUIDField(default=uuid.uuid4, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "password_reset_tokens"
+
+    def is_valid(self) -> bool:
+        """Tokens expire after 30 minutes."""
+        return not self.used and timezone.now() < self.created_at + timedelta(minutes=30)
