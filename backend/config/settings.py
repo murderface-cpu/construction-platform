@@ -25,6 +25,21 @@ FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5173")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@buildhub.com")
 
 # ---------------------------------------------------------------------------
+# Security / Proxy
+# ---------------------------------------------------------------------------
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+CSRF_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SAMESITE = "None"
+
+USE_X_FORWARDED_HOST = True
+SECURE_SSL_REDIRECT = True
+
+# ---------------------------------------------------------------------------
 # Application definition
 # ---------------------------------------------------------------------------
 DJANGO_APPS = [
@@ -230,10 +245,16 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:3000",
-    "https://construction-platform-backend-6wen.onrender.com",
+    "https://construction-platform-zlem.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
+# ---------------------------------------------------------------------------
+# CSRF
+# ---------------------------------------------------------------------------
+CSRF_TRUSTED_ORIGINS = [
+    "https://construction-platform-backend-6wen.onrender.com",
+]
 # ---------------------------------------------------------------------------
 # Media & Static Files
 # ---------------------------------------------------------------------------
