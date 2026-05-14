@@ -9,6 +9,7 @@ Pillow
 # Auth
 djangorestframework-simplejwt
 django-allauth
+django-jazzmin
 
 # Database
 psycopg2-binary
