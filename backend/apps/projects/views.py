@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -28,7 +29,9 @@ class ProjectListCreateView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = ProjectListSerializer
 
+    @extend_schema(responses={200: ProjectListSerializer(many=True)})
     def get(self, request: Request) -> Response:
         projects = services.list_projects(request.user)
         status_filter = request.query_params.get("status")
@@ -41,6 +44,7 @@ class ProjectListCreateView(APIView):
             ProjectListSerializer(page, many=True).data
         )
 
+    @extend_schema(request=ProjectWriteSerializer, responses={201: ProjectDetailSerializer})
     def post(self, request: Request) -> Response:
         serializer = ProjectWriteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -58,11 +62,14 @@ class ProjectDetailView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = ProjectDetailSerializer
 
+    @extend_schema(responses={200: ProjectDetailSerializer})
     def get(self, request: Request, pk: str) -> Response:
         project = services.get_project(pk, request.user)
         return success_response(ProjectDetailSerializer(project).data)
 
+    @extend_schema(request=ProjectWriteSerializer, responses={200: ProjectDetailSerializer})
     def patch(self, request: Request, pk: str) -> Response:
         serializer = ProjectWriteSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -74,7 +81,9 @@ class AssignContractorView(APIView):
     """POST /api/v1/projects/{id}/assign/"""
 
     permission_classes = [IsAuthenticated]
+    serializer_class = AssignContractorSerializer
 
+    @extend_schema(request=AssignContractorSerializer, responses={201: None})
     def post(self, request: Request, pk: str) -> Response:
         serializer = AssignContractorSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -97,12 +106,15 @@ class MilestoneListCreateView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = MilestoneSerializer
 
+    @extend_schema(responses={200: MilestoneSerializer(many=True)})
     def get(self, request: Request, pk: str) -> Response:
         project = services.get_project(pk, request.user)
         milestones = project.milestones.select_related("assigned_to").all()
         return success_response(MilestoneSerializer(milestones, many=True).data)
 
+    @extend_schema(request=MilestoneSerializer, responses={201: MilestoneSerializer})
     def post(self, request: Request, pk: str) -> Response:
         serializer = MilestoneSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -123,7 +135,9 @@ class MilestoneDetailView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = MilestoneSerializer
 
+    @extend_schema(request=MilestoneSerializer, responses={200: MilestoneSerializer})
     def patch(self, request: Request, pk: str, mid: str) -> Response:
         serializer = MilestoneSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -135,6 +149,7 @@ class MilestoneDetailView(APIView):
         )
         return success_response(MilestoneSerializer(milestone).data)
 
+    @extend_schema(responses={204: None})
     def delete(self, request: Request, pk: str, mid: str) -> Response:
         services.delete_milestone(mid, pk, request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)

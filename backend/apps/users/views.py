@@ -4,6 +4,7 @@ User authentication and profile views.
 
 from __future__ import annotations
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
@@ -23,8 +24,7 @@ from .serializers import (
     RegisterSerializer,
     UpdateProfileSerializer,
     UserProfileSerializer,
-    PasswordResetRequestSerializer,  
-    PasswordResetConfirmSerializer, 
+    PasswordResetRequestSerializer,
 )
 
 
@@ -32,7 +32,9 @@ class RegisterView(APIView):
     """POST /api/v1/auth/register — create a new user account."""
 
     permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer
 
+    @extend_schema(request=RegisterSerializer, responses={201: UserProfileSerializer})
     def post(self, request: Request) -> Response:
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -66,6 +68,7 @@ class LogoutView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: None})
     def post(self, request: Request) -> Response:
         refresh_token = request.data.get("refresh")
         if not refresh_token:
@@ -88,11 +91,14 @@ class ProfileView(APIView):
     """GET/PATCH /api/v1/auth/me — view or update the authenticated user's profile."""
 
     permission_classes = [IsAuthenticated]
+    serializer_class = UserProfileSerializer
 
+    @extend_schema(responses={200: UserProfileSerializer})
     def get(self, request: Request) -> Response:
         serializer = UserProfileSerializer(request.user)
         return success_response(serializer.data)
 
+    @extend_schema(request=UpdateProfileSerializer, responses={200: UserProfileSerializer})
     def patch(self, request: Request) -> Response:
         serializer = UpdateProfileSerializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -107,7 +113,9 @@ class ChangePasswordView(APIView):
     """POST /api/v1/auth/change-password"""
 
     permission_classes = [IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
 
+    @extend_schema(request=ChangePasswordSerializer, responses={200: None})
     def post(self, request: Request) -> Response:
         serializer = ChangePasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -127,6 +135,7 @@ class ProfileImageUploadURLView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: None})
     def post(self, request: Request) -> Response:
         filename = request.data.get("filename", "profile.jpg")
         content_type = request.data.get("content_type", "image/jpeg")
@@ -141,7 +150,9 @@ class PasswordResetRequestView(APIView):
     """POST /api/v1/auth/password/reset/ — request a reset email."""
 
     permission_classes = [AllowAny]
+    serializer_class = PasswordResetRequestSerializer
 
+    @extend_schema(request=PasswordResetRequestSerializer, responses={200: None})
     def post(self, request: Request) -> Response:
         serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -154,7 +165,9 @@ class PasswordResetConfirmView(APIView):
     """POST /api/v1/auth/password/reset/confirm/ — set a new password using the token."""
 
     permission_classes = [AllowAny]
+    serializer_class = PasswordResetConfirmSerializer
 
+    @extend_schema(request=PasswordResetConfirmSerializer, responses={200: None})
     def post(self, request: Request) -> Response:
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

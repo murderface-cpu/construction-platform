@@ -5,6 +5,7 @@ Marketplace views — contractor profiles and portfolios.
 from __future__ import annotations
 
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import filters, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
@@ -34,7 +35,9 @@ class ContractorListView(APIView):
     """
 
     permission_classes = [AllowAny]
+    serializer_class = ContractorListSerializer
 
+    @extend_schema(responses={200: ContractorListSerializer(many=True)})
     def get(self, request: Request) -> Response:
         qs = services.list_contractors(
             location=request.query_params.get("location", ""),
@@ -57,7 +60,9 @@ class ContractorDetailView(APIView):
     """
 
     permission_classes = [AllowAny]
+    serializer_class = ContractorProfileSerializer
 
+    @extend_schema(responses={200: ContractorProfileSerializer})
     def get(self, request: Request, pk: str) -> Response:
         profile = services.get_contractor_profile(pk)
         serializer = ContractorProfileSerializer(profile, context={"request": request})
@@ -71,12 +76,15 @@ class MyContractorProfileView(APIView):
     """
 
     permission_classes = [IsAuthenticated, IsContractor]
+    serializer_class = ContractorProfileSerializer
 
+    @extend_schema(responses={200: ContractorProfileSerializer})
     def get(self, request: Request) -> Response:
         profile = services.get_or_create_contractor_profile(request.user)
         serializer = ContractorProfileSerializer(profile, context={"request": request})
         return success_response(serializer.data)
 
+    @extend_schema(request=ContractorProfileUpdateSerializer, responses={200: ContractorProfileSerializer})
     def patch(self, request: Request) -> Response:
         serializer = ContractorProfileUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -98,13 +106,16 @@ class PortfolioView(APIView):
     """
 
     permission_classes = [IsAuthenticated, IsContractor]
+    serializer_class = PortfolioProjectSerializer
 
+    @extend_schema(responses={200: PortfolioProjectSerializer(many=True)})
     def get(self, request: Request) -> Response:
         profile = services.get_or_create_contractor_profile(request.user)
         projects = profile.portfolio_projects.prefetch_related("images").all()
         serializer = PortfolioProjectSerializer(projects, many=True, context={"request": request})
         return success_response(serializer.data)
 
+    @extend_schema(request=PortfolioProjectWriteSerializer, responses={201: PortfolioProjectSerializer})
     def post(self, request: Request) -> Response:
         profile = services.get_or_create_contractor_profile(request.user)
         serializer = PortfolioProjectWriteSerializer(data=request.data)
@@ -123,7 +134,9 @@ class PortfolioProjectDetailView(APIView):
     """
 
     permission_classes = [IsAuthenticated, IsContractor]
+    serializer_class = PortfolioProjectWriteSerializer
 
+    @extend_schema(request=PortfolioProjectWriteSerializer, responses={200: PortfolioProjectSerializer})
     def patch(self, request: Request, pk: str) -> Response:
         profile = services.get_or_create_contractor_profile(request.user)
         serializer = PortfolioProjectWriteSerializer(data=request.data, partial=True)
@@ -131,6 +144,7 @@ class PortfolioProjectDetailView(APIView):
         project = services.update_portfolio_project(pk, profile, **serializer.validated_data)
         return success_response(PortfolioProjectSerializer(project, context={"request": request}).data)
 
+    @extend_schema(responses={204: None})
     def delete(self, request: Request, pk: str) -> Response:
         profile = services.get_or_create_contractor_profile(request.user)
         services.delete_portfolio_project(pk, profile)
@@ -145,6 +159,7 @@ class PortfolioImageUploadURLView(APIView):
 
     permission_classes = [IsAuthenticated, IsContractor]
 
+    @extend_schema(request=None, responses={200: None})
     def post(self, request: Request, pk: str) -> Response:
         filename = request.data.get("filename", "image.jpg")
         content_type = request.data.get("content_type", "image/jpeg")

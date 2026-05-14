@@ -1,5 +1,6 @@
 """Designs views."""
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
@@ -17,7 +18,9 @@ from .serializers import DesignDetailSerializer, DesignListSerializer
 class DesignListView(APIView):
     """GET /api/v1/designs/"""
     permission_classes = [AllowAny]
+    serializer_class = DesignListSerializer
 
+    @extend_schema(responses={200: DesignListSerializer(many=True)})
     def get(self, request: Request) -> Response:
         qs = services.list_designs(
             category=request.query_params.get("category", ""),
@@ -31,7 +34,9 @@ class DesignListView(APIView):
 class DesignDetailView(APIView):
     """GET /api/v1/designs/{id}/"""
     permission_classes = [AllowAny]
+    serializer_class = DesignDetailSerializer
 
+    @extend_schema(responses={200: DesignDetailSerializer})
     def get(self, request: Request, pk: str) -> Response:
         design = services.get_design(pk)
         return success_response(DesignDetailSerializer(design).data)
@@ -44,10 +49,12 @@ class SaveDesignView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={201: None})
     def post(self, request: Request, pk: str) -> Response:
         services.save_design(request.user, pk)
         return Response({"success": True, "message": "Design saved."}, status=status.HTTP_201_CREATED)
 
+    @extend_schema(request=None, responses={204: None})
     def delete(self, request: Request, pk: str) -> Response:
         services.unsave_design(request.user, pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -56,7 +63,9 @@ class SaveDesignView(APIView):
 class MySavedDesignsView(APIView):
     """GET /api/v1/designs/saved/"""
     permission_classes = [IsAuthenticated]
+    serializer_class = DesignListSerializer
 
+    @extend_schema(responses={200: DesignListSerializer(many=True)})
     def get(self, request: Request) -> Response:
         saved = SavedDesign.objects.filter(user=request.user).select_related("design")
         designs = [s.design for s in saved]

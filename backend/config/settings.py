@@ -28,6 +28,7 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@buildhub.com"
 # Application definition
 # ---------------------------------------------------------------------------
 DJANGO_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -296,3 +297,137 @@ SPECTACULAR_SETTINGS = {
 # ---------------------------------------------------------------------------
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
 MAX_UPLOAD_SIZE_MB = 10  # 10 MB limit per upload
+
+# ---------------------------------------------------------------------------
+# Jazzmin Admin Theme
+# ---------------------------------------------------------------------------
+JAZZMIN_SETTINGS = {
+    "site_title":        "BuildHub Platform",
+    "site_header":       "BuildHub",
+    "site_brand":        "BuildHub",
+    "site_logo_classes": "img-circle",
+    "site_icon":         "/static/img/favicon.png",
+    "welcome_sign":      "Welcome back",
+    "copyright":         "Nerdware Systems Ltd",
+    "user_avatar":       None,
+
+    # Top navigation bar links
+    "topmenu_links": [
+        {"name": "Dashboard",  "url": "admin:index",        "permissions": ["auth.view_user"]},
+        {"name": "Site",       "url": "/",                  "new_window": True},
+        {"name": "Bookings",   "model": "bookings.Booking"},
+        {"name": "Projects",   "model": "projects.Project"},
+    ],
+
+    # User avatar dropdown links
+    "usermenu_links": [
+        {"name": "View Site", "url": "/", "new_window": True, "icon": "fas fa-external-link-alt"},
+        {"model": "auth.user"},
+    ],
+
+    "show_sidebar":           True,
+    "navigation_expanded":    False,
+    "hide_apps":              [],
+    "hide_models":            [],
+    "order_with_respect_to": [
+        "auth",
+        "users",
+        "marketplace",
+        "bookings",
+        "projects",
+        "reviews",
+        "designs",
+        "notifications",
+        "sites",
+    ],
+
+    "search_model": ["auth.user", "bookings.Booking", "projects.Project"],
+
+    "icons": {
+        "auth":                          "fas fa-shield-alt",
+        "auth.user":                     "fas fa-user",
+        "auth.Group":                    "fas fa-users",
+        "users":                         "fas fa-id-badge",
+        "users.User":                    "fas fa-user-circle",
+        "users.PasswordResetToken":      "fas fa-key",
+        "marketplace":                   "fas fa-store",
+        "marketplace.ContractorProfile": "fas fa-hard-hat",
+        "marketplace.PortfolioProject":  "fas fa-briefcase",
+        "marketplace.PortfolioImage":    "fas fa-images",
+        "bookings":                      "fas fa-calendar-alt",
+        "bookings.Booking":              "fas fa-calendar-check",
+        "bookings.AvailabilitySlot":     "fas fa-clock",
+        "projects":                      "fas fa-tools",
+        "projects.Project":              "fas fa-project-diagram",
+        "projects.Milestone":            "fas fa-flag-checkered",
+        "reviews":                       "fas fa-star-half-alt",
+        "reviews.Review":                "fas fa-star",
+        "designs":                       "fas fa-drafting-compass",
+        "designs.DesignTemplate":        "fas fa-palette",
+        "designs.DesignImage":           "fas fa-photo-video",
+        "designs.SavedDesign":           "fas fa-bookmark",
+        "notifications":                 "fas fa-bell",
+        "notifications.Notification":    "fas fa-bell",
+        "sites":                         "fas fa-globe",
+        "sites.Site":                    "fas fa-server",
+    },
+    "default_icon_parents":  "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-dot-circle",
+
+    "show_ui_builder":           False,
+    "related_modal_horizontal":  True,
+    "related_modal_autoload":    True,
+    "async_orders":              True,
+
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "auth.user":        "collapsible",
+        "auth.group":       "vertical_tabs",
+        "bookings.booking": "horizontal_tabs",
+        "projects.project": "horizontal_tabs",
+    },
+}
+
+# ---------------------------------------------------------------------------
+# UI Tweaks
+# ---------------------------------------------------------------------------
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text":  False,
+    "footer_small_text":  True,
+    "body_small_text":    False,
+    "brand_small_text":   False,
+
+    "brand_colour":    "navbar-dark",
+    "accent":          "accent-warning",
+    "theme":           "darkly",
+    "dark_mode_theme": "darkly",
+    "dark_mode":       True,
+
+    "navbar":           "navbar-dark",
+    "no_navbar_border": True,
+    "navbar_fixed":     True,
+
+    "sidebar":                   "sidebar-dark-warning",
+    "sidebar_nav_small_text":    False,
+    "sidebar_disable_expand":    False,
+    "sidebar_nav_child_indent":  True,
+    "sidebar_nav_compact_style": True,
+    "sidebar_nav_legacy_style":  False,
+    "sidebar_nav_flat_style":    False,
+
+    "layout_boxed":       False,
+    "footer_fixed":       False,
+    "actions_sticky_top": True,
+
+    "changeform_format": "horizontal_tabs",
+    "show_builder":      False,
+
+    "button_classes": {
+        "primary":   "btn-primary",
+        "secondary": "btn-outline-secondary",
+        "info":      "btn-info",
+        "warning":   "btn-warning",
+        "danger":    "btn-danger",
+        "success":   "btn-success",
+    },
+}

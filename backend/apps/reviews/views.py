@@ -1,5 +1,6 @@
 """Reviews views."""
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
@@ -20,11 +21,14 @@ class ReviewListCreateView(APIView):
     GET  /api/v1/reviews/?contractor_id={id}   — list reviews for a contractor
     """
 
+    serializer_class = ReviewSerializer
+
     def get_permissions(self):
         if self.request.method == "GET":
             return [AllowAny()]
         return [IsAuthenticated()]
 
+    @extend_schema(responses={200: ReviewSerializer(many=True)})
     def get(self, request: Request) -> Response:
         contractor_id = request.query_params.get("contractor_id")
         qs = Review.objects.select_related("reviewer", "contractor")
@@ -34,6 +38,7 @@ class ReviewListCreateView(APIView):
         page = paginator.paginate_queryset(qs, request)
         return paginator.get_paginated_response(ReviewSerializer(page, many=True).data)
 
+    @extend_schema(request=CreateReviewSerializer, responses={201: ReviewSerializer})
     def post(self, request: Request) -> Response:
         serializer = CreateReviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

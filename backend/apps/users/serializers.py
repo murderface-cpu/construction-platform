@@ -72,6 +72,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "email",
             "name",
             "role",
+            "is_staff",
             "location",
             "profile_image",
             "bio",

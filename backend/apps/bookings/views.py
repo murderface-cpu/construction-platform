@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -29,7 +30,9 @@ class BookingListCreateView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = BookingSerializer
 
+    @extend_schema(responses={200: BookingSerializer(many=True)})
     def get(self, request: Request) -> Response:
         user = request.user
         if user.is_homeowner:
@@ -45,6 +48,7 @@ class BookingListCreateView(APIView):
         page = paginator.paginate_queryset(qs, request)
         return paginator.get_paginated_response(BookingSerializer(page, many=True).data)
 
+    @extend_schema(request=CreateBookingSerializer, responses={201: BookingSerializer})
     def post(self, request: Request) -> Response:
         if not request.user.is_homeowner:
             return Response(
@@ -83,6 +87,7 @@ class BookingDetailView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = BookingSerializer
 
     def _get_booking(self, pk: str, user) -> Booking:
         try:
@@ -104,7 +109,9 @@ class BookingStatusView(APIView):
     """PATCH /api/v1/bookings/{id}/status/"""
 
     permission_classes = [IsAuthenticated, IsContractor]
+    serializer_class = BookingStatusUpdateSerializer
 
+    @extend_schema(request=BookingStatusUpdateSerializer, responses={200: BookingSerializer})
     def patch(self, request: Request, pk: str) -> Response:
         try:
             booking = Booking.objects.get(id=pk)
@@ -132,7 +139,9 @@ class BookingCompleteView(APIView):
     """POST /api/v1/bookings/{id}/complete/"""
 
     permission_classes = [IsAuthenticated]
+    serializer_class = BookingSerializer
 
+    @extend_schema(request=None, responses={200: BookingSerializer})
     def post(self, request: Request, pk: str) -> Response:
         try:
             booking = Booking.objects.get(id=pk)
@@ -147,7 +156,9 @@ class BookingCancelView(APIView):
     """POST /api/v1/bookings/{id}/cancel/"""
 
     permission_classes = [IsAuthenticated]
+    serializer_class = BookingSerializer
 
+    @extend_schema(request=None, responses={200: BookingSerializer})
     def post(self, request: Request, pk: str) -> Response:
         try:
             booking = Booking.objects.get(id=pk)
@@ -170,11 +181,14 @@ class AvailabilitySlotView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = AvailabilitySlotSerializer
 
+    @extend_schema(responses={200: AvailabilitySlotSerializer(many=True)})
     def get(self, request: Request) -> Response:
         slots = services.get_contractor_availability(request.user)
         return success_response(AvailabilitySlotSerializer(slots, many=True).data)
 
+    @extend_schema(request=AvailabilitySlotSerializer, responses={201: AvailabilitySlotSerializer})
     def post(self, request: Request) -> Response:
         if not request.user.is_contractor:
             return Response(status=status.HTTP_403_FORBIDDEN)

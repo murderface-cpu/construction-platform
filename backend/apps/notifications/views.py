@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -25,7 +26,9 @@ class NotificationListView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = NotificationSerializer
 
+    @extend_schema(responses={200: NotificationSerializer(many=True)})
     def get(self, request: Request) -> Response:
         qs = Notification.objects.filter(recipient=request.user)
         if request.query_params.get("unread", "").lower() == "true":
@@ -42,6 +45,7 @@ class NotificationUnreadCountView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses={200: None})
     def get(self, request: Request) -> Response:
         count = services.get_unread_count(request.user)
         return success_response({"unread_count": count})
@@ -53,7 +57,9 @@ class MarkNotificationReadView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = NotificationSerializer
 
+    @extend_schema(request=None, responses={200: NotificationSerializer})
     def patch(self, request: Request, pk: str) -> Response:
         notification = services.mark_read(request.user, pk)
         return success_response(
@@ -67,6 +73,7 @@ class MarkAllNotificationsReadView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: None})
     def post(self, request: Request) -> Response:
         count = services.mark_all_read(request.user)
         return success_response(
