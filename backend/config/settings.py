@@ -230,6 +230,7 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:3000",
+    "https://construction-platform-backend-6wen.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
